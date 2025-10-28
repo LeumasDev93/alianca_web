@@ -5,8 +5,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+// Header and Footer are provided by the root layout
 import { LoadingSpinner } from "@/components/Loading";
 import Link from "next/link";
 import { ErrorMessage } from "@/components/ErroMessage";
@@ -364,7 +363,7 @@ export default function AliancaAboutUsDetails() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      {/* Header provided by layout */}
       <ButtonHelp />
       <main className="flex-grow flex flex-col items-center">
         {isLoading ? (
@@ -387,7 +386,7 @@ export default function AliancaAboutUsDetails() {
           </div>
         )}
       </main>
-      <Footer />
+      {/* Footer provided by layout */}
     </div>
   );
 }

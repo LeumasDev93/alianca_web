@@ -4,8 +4,7 @@ import ButtonBackToPrevious from "@/components/buttonBackToPrev";
 import ButtonContact from "@/components/buttonContact";
 import ButtonHelp from "@/components/buttonHelp";
 import ButtonSimulate from "@/components/buttonSimulate";
-import Footer from "@/components/footer";
-import Header from "@/components/header";
+// Header and Footer are provided by the root layout
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
@@ -91,7 +90,7 @@ export default function AliancaDetails() {
 
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center justify-center w-full">
-      <Header />
+      {/* Header provided by layout */}
       {!selectedCard ? (
         <div className="flex flex-col items-center justify-center md:my-48 w-full py-10 bg-[#F4F2F2]">
           {isLoading ? (
@@ -155,9 +154,7 @@ export default function AliancaDetails() {
       <ButtonBackToPrevious />
       <ButtonHelp />
 
-      <div className="w-full md:-mt-20">
-        <Footer />
-      </div>
+      {/* Footer provided by layout */}
     </main>
   );
 }
