@@ -3,7 +3,7 @@ export const revalidate = 60;
 
 import Banner from "@/components/banner/banner";
 import ButtonHelp from "@/components/buttonHelp";
-import ButtonSimulate from "@/components/buttonSimulate";
+import FloatingButtons from "@/components/FloatingButtons";
 import Depoiments from "@/components/depoiments";
 import FeaturedAlliance from "@/components/FeaturedAlliance";
 import NewsAlliance from "@/components/newsAlliance";
@@ -80,7 +80,7 @@ export default async function Home() {
         <Service servicos={servicos} baseImageUrl={BASE_IMAGE_URL} />
         <Depoiments testemunhos={testemunhos} baseImageUrl={BASE_IMAGE_URL} />
         <ButtonHelp />
-        <ButtonSimulate />
+        <FloatingButtons />
       </main>
       <SessionRefresher />
     </div>

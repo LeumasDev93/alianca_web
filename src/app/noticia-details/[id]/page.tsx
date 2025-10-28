@@ -12,8 +12,7 @@ import Link from "next/link";
 import { ErrorMessage } from "@/components/ErroMessage";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ButtonHelp from "@/components/buttonHelp";
-import ButtonContact from "@/components/buttonContact";
-import ButtonSimulate from "@/components/buttonSimulate";
+import FloatingButtons from "@/components/FloatingButtons";
 import { LiaSpinnerSolid } from "react-icons/lia";
 import { BlocksRenderer } from "@strapi/blocks-react-renderer";
 import { MarkdownRenderer } from "@/lib/markdown";
@@ -392,6 +391,7 @@ export default function NoticiaDetails() {
   return (
     <div className="flex flex-col min-h-screen">
       <ButtonHelp />
+      <FloatingButtons />
       <main className="flex-grow flex flex-col items-center">
         {isLoading ? (
           <LoadingSpinner />

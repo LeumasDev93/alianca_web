@@ -10,6 +10,7 @@ import { LoadingSpinner } from "@/components/Loading";
 import Link from "next/link";
 import { ErrorMessage } from "@/components/ErroMessage";
 import ButtonHelp from "@/components/buttonHelp";
+import FloatingButtons from "@/components/FloatingButtons";
 import { apiAlianca, BASE_IMAGE_URL } from "@/data/service/axios";
 import { FaChevronLeft, FaChevronRight, FaImage } from "react-icons/fa";
 import { LiaSpinnerSolid } from "react-icons/lia";
@@ -365,6 +366,7 @@ export default function AliancaAboutUsDetails() {
     <div className="flex flex-col min-h-screen">
       {/* Header provided by layout */}
       <ButtonHelp />
+      <FloatingButtons />
       <main className="flex-grow flex flex-col items-center">
         {isLoading ? (
           <LoadingSpinner />

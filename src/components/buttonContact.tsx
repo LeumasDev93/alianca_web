@@ -23,7 +23,7 @@ export default function ButtonContact() {
     <>
       <button
         onClick={handleModalContact}
-        className="fixed top-[470px] md:top-96 right-0.5 p-4 md:p-4 bg-blue-900 hover:bg-white hover:border border-blue-950 rounded-xl shadow-lg transition-all duration-300 ease-in-out w-10 h-10 md:w-20 md:h-20 flex flex-col items-center justify-center group"
+        className="fixed top-[470px] z-[1000] md:top-96 right-0.5 p-4 md:p-4 bg-[#B7021C] hover:bg-white hover:border border-[#B7021C]/80 rounded-xl shadow-lg transition-all duration-300 ease-in-out w-10 h-10 md:w-20 md:h-20 flex flex-col items-center justify-center group"
       >
         <div className="flex items-center justify-center md:relative w-4 h-4 md:w-8 md:h-8">
           {/* Imagem padrão */}

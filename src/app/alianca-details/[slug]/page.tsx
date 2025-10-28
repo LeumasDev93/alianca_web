@@ -1,9 +1,8 @@
 "use client";
 
 import ButtonBackToPrevious from "@/components/buttonBackToPrev";
-import ButtonContact from "@/components/buttonContact";
 import ButtonHelp from "@/components/buttonHelp";
-import ButtonSimulate from "@/components/buttonSimulate";
+import FloatingButtons from "@/components/FloatingButtons";
 // Header and Footer are provided by the root layout
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
@@ -153,6 +152,7 @@ export default function AliancaDetails() {
       )}
       <ButtonBackToPrevious />
       <ButtonHelp />
+      <FloatingButtons />
 
       {/* Footer provided by layout */}
     </main>
