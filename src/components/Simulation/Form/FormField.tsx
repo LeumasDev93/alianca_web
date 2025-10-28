@@ -379,7 +379,7 @@ export default function FormField({
             name={field.name}
             type="date"
             value={value}
-            className={`w-full px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm border rounded-lg text-gray-500 ${
+            className={`w-full px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm border rounded-lg text-gray-900 placeholder-gray-500 ${
               licenseDateError ? "border-red-500" : "border-gray-300"
             }`}
             onChange={(e) => {
@@ -477,7 +477,7 @@ export default function FormField({
                 onChange("");
               }
             }}
-            className={`w-full p-2 border rounded-md text-gray-500  ${
+            className={`w-full p-2 border rounded-md text-gray-900 placeholder-gray-500 ${
               birthDateError ? "border-red-500" : "border-gray-300"
             }`}
             required={field.required}
@@ -546,7 +546,7 @@ export default function FormField({
                 onChange("");
               }
             }}
-            className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-[#002256] ${
+            className={`w-full p-2 border rounded-md text-gray-900 placeholder-gray-500 ${
               dateError ? "border-red-500" : "border-gray-300"
             }`}
             required={field.required}
@@ -664,7 +664,7 @@ export default function FormField({
             name={field.name}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className={`w-full p-2 border rounded-md text-gray-500 ${
+            className={`w-full p-2 border rounded-md text-gray-900 placeholder-gray-500 ${
               error ? "border-red-500" : "border-gray-300"
             } bg-white`}
             required={field.required}
@@ -737,7 +737,7 @@ export default function FormField({
           name={field.name}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full p-2 border rounded-md text-gray-500 ${
+          className={`w-full p-2 border rounded-md text-gray-900 placeholder-gray-500 ${
             error ? "border-red-500" : "border-gray-300"
           }`}
           required={field.required}
@@ -768,7 +768,7 @@ export default function FormField({
             onFocus={() => setShowOptions(true)}
             onBlur={() => setTimeout(() => setShowOptions(false), 200)}
             autoComplete="off"
-            className={`w-full p-2 border rounded-md text-gray-500 ${
+            className={`w-full p-2 border rounded-md text-gray-900 placeholder-gray-500 ${
               error ? "border-red-500" : "border-gray-300"
             }`}
             required={field.required}
@@ -796,7 +796,7 @@ export default function FormField({
           value={value}
           placeholder={field.fieldPlaceholder}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full p-2 border rounded-md text-gray-500 ${
+          className={`w-full p-2 border rounded-md text-gray-900 placeholder-gray-500 ${
             error ? "border-red-500" : "border-gray-300"
           } bg-white`}
           required={field.required}
@@ -820,6 +820,15 @@ export default function FormField({
         .react-select--error .react-select__control {
           border-color: #ef4444;
         }
+        /* Date input readability */
+        input[type='date'] { color: #111827; }
+        input[type='date']::-webkit-datetime-edit-ampm-field,
+        input[type='date']::-webkit-datetime-edit-day-field,
+        input[type='date']::-webkit-datetime-edit-month-field,
+        input[type='date']::-webkit-datetime-edit-year-field,
+        input[type='date']::-webkit-datetime-edit { color: #111827; }
+        input[type='date']::-webkit-datetime-edit-text { color: #6b7280; }
+        input[type='date']::-webkit-calendar-picker-indicator { filter: invert(20%); }
       `}</style>
     </div>
   );
