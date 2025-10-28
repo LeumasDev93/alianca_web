@@ -166,3 +166,109 @@ export interface ImagemProfile {
       };
     };
   };
+  
+  // Simulation types
+  export type Simulation = {
+    id: number;
+    reference: string;
+    createdAt?: string;
+    totalPremium?: number;
+  };
+  
+// Removed duplicate SimulationResponse - using the complete interface below
+
+  // Product types for simulation
+  export type Product = {
+    productId: string;
+    name: string;
+    description: string;
+    icon?: string;
+    category?: string;
+    tabs?: any[];
+  };
+
+  export interface ApiResponse<T> {
+    info: {
+      count: number;
+      page: number;
+      status: number;
+      errors: null | string;
+    };
+    results: T;
+  }
+
+  export interface InstallmentValue {
+    name: string;
+    value: number;
+    annualValue: number;
+    taxes: Record<string, number>;
+  }
+
+  export interface PropertyValue {
+    name: string;
+    type: string;
+    value: string;
+    rank: number;
+    translationCode: string;
+  }
+
+  export interface PropertyGroup {
+    name: string;
+    values: PropertyValue[];
+  }
+
+  export interface Risk {
+    name: string;
+    order: number;
+    code: string;
+    active: boolean;
+    capital: number;
+    capitalOption: string | null;
+    premium: number;
+    taxes: Record<string, number>;
+    bonusMalus: any;
+    deductibleValue: number;
+  }
+
+  export interface SimulationObject {
+    idSimulationObject: number | null;
+    reference: string;
+    capital: number;
+    premium: number;
+    premiumTotal: number | null;
+    startDate: string;
+    endDate: string | null;
+    code: string | null;
+    status: string;
+    description: string | null;
+    type: any;
+    discount: number;
+    franchise: number | null;
+    propertyGroup: PropertyGroup | null;
+    properties: any;
+    risks: Risk[];
+    children: SimulationObject[] | null;
+    dependents: any;
+  }
+
+  export interface SimulationResponse {
+    idSimulationTel: number;
+    idContract: number;
+    reference: string;
+    totalPremium: number;
+    premium: number;
+    renewalDate: string;
+    continuedDate: string | null;
+    clientReference: string | null;
+    producerReference: string;
+    product: any;
+    propertyGroup: any;
+    installmentValues: InstallmentValue[];
+    simulationObjects: SimulationObject[];
+    currency: string;
+    currencySymbol: string;
+    hasError: boolean;
+    errors: string[];
+    hasWarnings: boolean;
+    warnings: string[];
+  }

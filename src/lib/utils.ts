@@ -5,7 +5,13 @@ import { twMerge } from "tailwind-merge";
 import jwt from "jsonwebtoken";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
+}
+
+export function getSafeGridClass(gridSize?: number): string {
+  if (!gridSize || gridSize < 1) return "grid-cols-1";
+  if (gridSize > 4) return "grid-cols-4";
+  return `grid-cols-${gridSize}`;
 }
 
 const decodeJwt = (token: string) => {
