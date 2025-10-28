@@ -7,10 +7,11 @@ import { IoCloseOutline } from "react-icons/io5";
 import { LiaSpinnerSolid } from "react-icons/lia";
 
 export function ModalSimulate({ onClose }: { onClose: () => void }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
   const { products, loading, error } = useProducts();
 
   const handleSelectProduct = (product: { productId: string }) => {
+    setLoadingProductId(product.productId);
     window.location.href = `/simulaction?productId=${product.productId}`;
   };
 
@@ -38,6 +39,7 @@ export function ModalSimulate({ onClose }: { onClose: () => void }) {
             error={error}
             products={products}
             onSelect={handleSelectProduct as any}
+            loadingProductId={loadingProductId}
           />
         </div>
       </div>

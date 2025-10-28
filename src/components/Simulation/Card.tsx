@@ -1,6 +1,7 @@
 import { Product } from "@/types/typesData";
 import { FaCar, FaHome, FaShieldAlt, FaPlane } from "react-icons/fa";
 import * as FaIcons from "react-icons/fa";
+import { LiaSpinnerSolid } from "react-icons/lia";
 
 const iconMap: Record<string, any> = {
   FaCar,
@@ -15,7 +16,7 @@ function resolveIconFromWebIcon(webIcon?: string | null) {
   return Icon ? Icon : null;
 }
 
-export default function Card({ product, onSimulate }: { product: Product; onSimulate?: (p: Product) => void }) {
+export default function Card({ product, onSimulate, isLoading }: { product: Product; onSimulate?: (p: Product) => void; isLoading?: boolean }) {
   const DynamicIcon = resolveIconFromWebIcon((product as any).webIcon);
   const IconComponent = DynamicIcon || (product.icon ? iconMap[product.icon] : FaShieldAlt);
 
@@ -34,9 +35,11 @@ export default function Card({ product, onSimulate }: { product: Product; onSimu
 
         <button
           onClick={() => onSimulate?.(product)}
-          className="w-full bg-[#062f5d] hover:bg-[#05264b] text-white font-semibold rounded-md py-3 transition-colors"
+          disabled={isLoading}
+          className="w-full bg-[#062f5d] hover:bg-[#05264b] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-md py-3 transition-colors flex items-center justify-center gap-2"
         >
-          Simular Agora
+          {isLoading && <LiaSpinnerSolid className="w-4 h-4 animate-spin" />}
+          {isLoading ? "Carregando..." : "Simular Agora"}
         </button>
       </div>
     </div>

@@ -8,11 +8,13 @@ export default function ProductsTab({
   error,
   products,
   onSelect,
+  loadingProductId,
 }: {
   loading: boolean;
   error: string | null;
   products: Product[];
   onSelect: (product: Product) => void;
+  loadingProductId?: string | null;
 }) {
   if (loading) return <LoadingContainer message="CARREGANDO PRODUTOS..." />;
   if (error) return <p className="text-red-500">{error}</p>;
@@ -26,7 +28,11 @@ export default function ProductsTab({
             key={product.productId}
             className="w-full sm:w-auto sm:flex-1 sm:max-w-[320px]"
           >
-            <Card product={product} onSimulate={() => onSelect(product)} />
+            <Card 
+              product={product} 
+              onSimulate={() => onSelect(product)} 
+              isLoading={loadingProductId === product.productId} 
+            />
           </div>
         ))}
       </div>
