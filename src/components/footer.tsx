@@ -10,7 +10,7 @@ import {
   FaPhone,
 } from "react-icons/fa6";
 import { ModalContact } from "./modalContact";
-import { BASE_IMAGE_URL } from "@/data/service/axios";
+import { STRAPI_URL } from "@/data/service/axios";
 import { FaMapMarkerAlt } from "react-icons/fa";
 
 interface FooterProps {
@@ -40,7 +40,7 @@ export default function Footer({ contactInfo, socialInfo }: FooterProps) {
 
   return (
     <footer className="bg-[#292929] text-white py-4 md:py-8 px-6 lg:px-20 w-full border-t-2 border-t-[#B7021C]">
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 md:gap-6 max-w-7xl mx-auto">
         <div className="flex flex-col min-h-[120px] w-full md:w-auto mb-2">
           <div className="mt-4 md:mt-6 space-y-3">
             <h3 className="text-lg font-bold mb-3">
@@ -127,7 +127,7 @@ export default function Footer({ contactInfo, socialInfo }: FooterProps) {
                   rel="noopener noreferrer"
                 >
                   <Image
-                    src={`${BASE_IMAGE_URL}${social.icon[0]?.url}`}
+                    src={`${STRAPI_URL}${social.icon[0]?.url}`}
                     alt={social.nome}
                     width={28}
                     height={28}

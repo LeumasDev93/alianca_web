@@ -148,7 +148,7 @@ const Banner: React.FC<BannerProps> = ({ banners, baseImageUrl }) => {
 
   return (
     <div
-      className="relative w-full h-52 sm:h-[50vh] lg:h-[80vh] xl:h-[50vh] overflow-hidden mt-4 sm:mt-6 md:mt-10 lg:mt-16 xl:mt-24 bg-center bg-cover"
+      className="relative w-full h-52 sm:h-[50vh] lg:h-[80vh] xl:h-[50vh] overflow-hidden mt-4 sm:mt-6 md:mt-10 lg:mt-16 xl:mt-20 bg-center bg-cover"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onWheel={onWheel}
@@ -157,7 +157,7 @@ const Banner: React.FC<BannerProps> = ({ banners, baseImageUrl }) => {
       style={{ backgroundImage: `url(${getImageUrl(currentBanner)})` }}
     >
       <div className="absolute inset-0">
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false}>
           <BannerSlide
             onclick={() => handleButtonClick(currentBanner.id)}
             key={currentIndex}
@@ -171,21 +171,6 @@ const Banner: React.FC<BannerProps> = ({ banners, baseImageUrl }) => {
             onSwipeLeft={() => handleUserInteraction(nextSlide)}
             onSwipeRight={() => handleUserInteraction(prevSlide)}
           />
-          {previousIndex !== currentIndex && banners.length > 1 && (
-            <BannerSlide
-              onclick={() => handleButtonClick(currentBanner.id)}
-              key={`prev-${previousIndex}`}
-              image={getImageUrl(previousBanner)}
-              title={previousBanner?.titulo}
-              subtitle={previousBanner?.description}
-              isActive={false}
-              direction={direction}
-              currentIndex={previousIndex}
-              previousIndex={previousIndex}
-              onSwipeLeft={() => handleUserInteraction(nextSlide)}
-              onSwipeRight={() => handleUserInteraction(prevSlide)}
-            />
-          )}
         </AnimatePresence>
         {/* Bottom progress bar */}
         {banners.length > 1 && (

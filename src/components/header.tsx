@@ -14,6 +14,7 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import LogoAlianca from "@/assets/images/AlincaSeguros.png";
 import { ModalContact } from "./modalContact";
 import { BASE_IMAGE_URL } from "@/data/service/axios";
+import { PhoneIcon, LockKeyhole } from "lucide-react";
 
 type HeaderSubmenu = {
   id: number;
@@ -114,10 +115,10 @@ export default function Header({
   // Social icons are provided by parent via props (static)
 
   return (
-    <header className="bg-white shadow-md fixed md:py-3 top-0 w-full md:h-24 h-14 z-50">
-      <div className="flex justify-between items-center px-4 sm:px-8 lg:px-20">
-        <div className="flex md:space-x-3 justify-between items-center py-3 md:py-0 w-full md:w-auto">
-          <div className="md:hidden ">
+    <header className="bg-white shadow-md fixed top-0 w-full md:h-20 h-14 z-50 px-6 lg:px-20">
+      <div className="flex justify-between items-center h-full max-w-7xl mx-auto">
+        <div className="flex md:space-x-3 justify-between items-center h-full py-2 md:py-0 w-full md:w-auto px-4 md:px-0">
+          <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 focus:outline-none"
@@ -125,21 +126,21 @@ export default function Header({
               <RiMenu2Line size={30} />
             </button>
           </div>
-          <div className="flex justify-end">
-            <Link href="/" className="text-white text-center">
+          <div className="flex items-center h-full">
+            <Link href="/" className="text-white text-center flex items-center">
               <Image
                 src={LogoAlianca}
                 alt="Logo"
                 width={160}
                 height={56}
-                className="w-24 h-8 lg:w-40 lg:h-14"
+                className="w-24 h-8 lg:w-36 lg:h-12"
               />
             </Link>
           </div>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-8 h-full">
+        <nav className="hidden md:flex h-full">
           {menus.map((menu) => (
             <div
               key={menu.id}
@@ -150,7 +151,7 @@ export default function Header({
               <Link
                 href={menu.path}
                 className={`
-                  flex items-center font-bold text-blue-950 text-sm lg:text-lg py-7 px-4 transition
+                  flex items-center h-full font-bold text-blue-950 text-sm lg:text-lg px-6 transition
                   hover:text-white hover:bg-[#B7021C]
                   ${
                     isMenuActive(menu.path, menu.topicos)
@@ -177,17 +178,28 @@ export default function Header({
           ))}
         </nav>
 
-        <div
-          className={`flex items-center space-x-4 md:space-x-8 ${
-            isOpen ? "hidden" : ""
-          }`}
+        <Link 
+          href="https://portal-myalianca.vercel.app" 
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`
+            relative flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-sm lg:text-base
+            bg-gray-200 text-[#002256]
+            hover:bg-gray-300
+            transition-all duration-300 group
+            ${isOpen ? "hidden" : ""}
+          `}
         >
-          {/* Ícones opcionais podem ser adicionados aqui */}
-        </div>
+          <LockKeyhole className="w-4 h-4 lg:w-5 lg:h-5" />
+          <span className="relative inline-block text-[#B7021C]">
+            My<span className="text-[#002256]">Aliança</span>
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#002256] via-purple-600 to-[#B7021C] group-hover:w-full transition-all duration-500 ease-out"></span>
+          </span>
+        </Link>
 
         {/* Desktop Dropdown Menu */}
         <div
-          className={`absolute left-1/2 top-16 sm:top-20 lg:top-24 transform -translate-x-1/2 shadow-xl w-full ${
+          className={`absolute left-1/2 top-16 sm:top-16 lg:top-20 transform -translate-x-1/2 shadow-xl w-full ${
             hoveredMenu && hoveredMenu.topicos.length > 0 ? "block" : "hidden"
           }`}
           onMouseEnter={() => setHoveredMenu(hoveredMenu)}
