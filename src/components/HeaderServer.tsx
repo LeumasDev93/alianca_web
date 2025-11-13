@@ -6,19 +6,24 @@ import { APIResponse } from "@/types/typesData";
 export const revalidate = 60; // Revalidate every 60 seconds (ISR)
 
 async function fetchFromApi<T>(path: string): Promise<T[]> {
-  const url = `${STRAPI_URL}/api${path}`;
-  
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-    next: { revalidate: 60 }, // Cache for 60 seconds
-  });
-  
-  if (!res.ok) {
+  try {
+    const url = `${STRAPI_URL}/api${path}`;
+    
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      next: { revalidate: 60 }, // Cache for 60 seconds
+    });
+    
+    if (!res.ok) {
+      return [] as T[];
+    }
+    
+    const json = (await res.json()) as APIResponse<T>;
+    return json.data as unknown as T[];
+  } catch (error) {
+    // Retorna array vazio se falhar (útil durante build)
     return [] as T[];
   }
-  
-  const json = (await res.json()) as APIResponse<T>;
-  return json.data as unknown as T[];
 }
 
 export default async function HeaderServer() {

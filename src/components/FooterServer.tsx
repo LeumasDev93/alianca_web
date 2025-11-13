@@ -5,19 +5,24 @@ import { STRAPI_URL, STRAPI_TOKEN } from "@/data/service/axios";
 export const revalidate = 60;
 
 async function fetchFooterData(): Promise<any> {
-  const url = `${STRAPI_URL}/api/footer?populate[itens][populate][0]=itens&populate[itens][populate][itens][populate][1]=icon`;
-  
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-    next: { revalidate: 60 },
-  });
-  
-  if (!res.ok) {
+  try {
+    const url = `${STRAPI_URL}/api/footer?populate[itens][populate][0]=itens&populate[itens][populate][itens][populate][1]=icon`;
+    
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      next: { revalidate: 60 },
+    });
+    
+    if (!res.ok) {
+      return null;
+    }
+    
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    // Retorna null se falhar (útil durante build)
     return null;
   }
-  
-  const json = await res.json();
-  return json.data;
 }
 
 export default async function FooterServer() {

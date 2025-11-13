@@ -13,36 +13,46 @@ import SessionRefresher from "../components/SessionRefresher";
 import { STRAPI_URL, STRAPI_TOKEN } from "@/data/service/axios";
 
 async function fetchBannersData(): Promise<any[]> {
-  const url = `${STRAPI_URL}/api/banners?populate[banner][populate][0]=image&populate[banner][populate][1]=video&populate[banner][populate][2]=button&populate[banner][populate][3]=button.page`;
-  
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-    next: { revalidate: 60 },
-  });
-  
-  if (!res.ok) {
+  try {
+    const url = `${STRAPI_URL}/api/banners?populate[banner][populate][0]=image&populate[banner][populate][1]=video&populate[banner][populate][2]=button&populate[banner][populate][3]=button.page`;
+    
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      next: { revalidate: 60 },
+    });
+    
+    if (!res.ok) {
+      return [];
+    }
+    
+    const json = await res.json();
+    return json.data || [];
+  } catch (error) {
+    // Retorna array vazio se falhar (útil durante build)
     return [];
   }
-  
-  const json = await res.json();
-  return json.data || [];
 }
 
 async function fetchHomePageData(): Promise<any> {
-  // URL exata fornecida pelo usuário
-  const url = `${STRAPI_URL}/api/home-page?populate[sessions][populate][0]=itens&populate[sessions][populate][itens][populate][1]=button&populate[sessions][populate][itens][populate][2]=image_presentation&populate[sessions][populate][itens][populate][3]=video_presentation&populate[sessions][populate][itens][populate][4]=button.page&populate[sessions][populate][itens][populate][5]=button.noticia`;
-  
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
-    next: { revalidate: 60 },
-  });
-  
-  if (!res.ok) {
+  try {
+    // URL exata fornecida pelo usuário
+    const url = `${STRAPI_URL}/api/home-page?populate[sessions][populate][0]=itens&populate[sessions][populate][itens][populate][1]=button&populate[sessions][populate][itens][populate][2]=image_presentation&populate[sessions][populate][itens][populate][3]=video_presentation&populate[sessions][populate][itens][populate][4]=button.page&populate[sessions][populate][itens][populate][5]=button.noticia`;
+    
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      next: { revalidate: 60 },
+    });
+    
+    if (!res.ok) {
+      return null;
+    }
+    
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    // Retorna null se falhar (útil durante build)
     return null;
   }
-  
-  const json = await res.json();
-  return json.data;
 }
 
 export default async function Home() {
