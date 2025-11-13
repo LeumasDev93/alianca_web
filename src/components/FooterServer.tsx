@@ -13,23 +13,17 @@ async function fetchFooterData(): Promise<any> {
   });
   
   if (!res.ok) {
-    console.error("❌ Footer fetch error:", res.status, res.statusText);
-    console.error("❌ URL tentada:", url);
     return null;
   }
   
-  console.log("✅ Footer fetch success!");
   const json = await res.json();
-  console.log("🔵 Footer JSON completo:", JSON.stringify(json, null, 2));
   return json.data;
 }
 
 export default async function FooterServer() {
-  console.log("🔵 FooterServer: Iniciando...");
   const footerData = await fetchFooterData();
   
   if (!footerData) {
-    console.log("❌ FooterServer: Nenhum dado recebido!");
     return (
       <Footer
         contactInfo={null}
@@ -60,11 +54,8 @@ export default async function FooterServer() {
     })) || [],
   };
 
-  console.log("🔵 Social Section:", JSON.stringify(socialSection, null, 2));
-
   const socialInfo = {
     rede_socials: socialSection?.itens?.map((item: any) => {
-      console.log(`🔵 Processando social item: ${item.title}, icon:`, item.icon);
       return {
         id: item.id,
         nome: item.title,
@@ -73,9 +64,6 @@ export default async function FooterServer() {
       };
     }) || [],
   };
-
-  console.log("🔵 FooterServer: Contact Info processado:", JSON.stringify(contactInfo, null, 2));
-  console.log("🔵 FooterServer: Social Info processado:", JSON.stringify(socialInfo, null, 2));
 
   return (
     <Footer
