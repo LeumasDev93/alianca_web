@@ -11,7 +11,7 @@ import Image from "next/image";
 import { LoadingSpinner } from "@/components/Loading";
 import Link from "next/link";
 import ButtonHelp from "@/components/buttonHelp";
-import { ErrorMessage } from "@/components/ErroMessage";
+import ErrorFallback from "@/components/ErrorFallback";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { ImagemProfile } from "@/types/typesData";
 import { LiaSpinnerSolid } from "react-icons/lia";
@@ -375,9 +375,9 @@ export default function NoticiasDetails() {
         {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
-          <ErrorMessage error={error} />
+          <ErrorFallback error={error} resetErrorBoundary={() => window.location.reload()} />
         ) : card.length === 0 ? (
-          <ErrorMessage error="Nenhum dado encontrado." />
+          <ErrorFallback error="Nenhum dado encontrado." resetErrorBoundary={() => window.location.reload()} />
         ) : (
           <div className="flex flex-col items-center justify-center w-full">
             {card.map((item) => (

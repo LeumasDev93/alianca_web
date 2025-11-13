@@ -115,40 +115,42 @@ const BannerSlide: React.FC<BannerSlideProps> = ({
           aria-label={title || "Banner"}
         />
 
-        {/* Overlays (reduzidas para evitar flash) */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Overlay com gradiente */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent z-0" />
 
         {/* Conteúdo */}
         <motion.div
-          className="absolute inset-0 flex flex-col justify-center items-center text-center z-30 px-4"
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-10 w-full h-full flex items-center"
           variants={textVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
-          <motion.h1
-            variants={textVariants}
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4 max-w-[90%] md:max-w-3xl drop-shadow-lg"
-          >
-            {title || "Bem-vindo"}
-          </motion.h1>
-
-          <motion.p
-            variants={textVariants}
-            transition={{ delay: 0.2 }}
-            className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white/90 max-w-[90%] sm:max-w-[80%] md:max-w-xl mb-3 sm:mb-4 md:mb-6 lg:mb-8 drop-shadow-md"
-          >
-            {subtitle || "Descubra nossos serviços"}
-          </motion.p>
-
-          <motion.div variants={textVariants} transition={{ delay: 0.4 }}>
-            <button
-              onClick={onclick}
-              className="bg-[#11165fe5] px-3 py-1 sm:px-4 sm:py-2 md:px-5 md:py-2 lg:px-6 lg:py-3 rounded-lg backdrop-blur-sm font-bold text-white hover:bg-[#1a1e53e1] hover:scale-105 transition-all text-xs sm:text-sm md:text-base"
+          <div className="max-w-3xl w-full">
+            <motion.h1
+              variants={textVariants}
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white drop-shadow-2xl mb-3 sm:mb-4 animate-fade-in"
             >
-              Saber Mais
-            </button>
-          </motion.div>
+              {title || "Bem-vindo"}
+            </motion.h1>
+
+            <motion.p
+              variants={textVariants}
+              transition={{ delay: 0.2 }}
+              className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 drop-shadow-lg mb-4 sm:mb-6"
+            >
+              {subtitle || "Descubra nossos serviços"}
+            </motion.p>
+
+            <motion.div variants={textVariants} transition={{ delay: 0.4 }}>
+              <button
+                onClick={onclick}
+                className="bg-[#B7021C] hover:bg-[#950119] text-white font-bold py-2 px-6 sm:py-3 sm:px-7 md:py-4 md:px-8 text-sm sm:text-base rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+              >
+                Saber Mais
+              </button>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </motion.div>

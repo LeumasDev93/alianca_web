@@ -4,8 +4,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { LiaSpinnerSolid } from "react-icons/lia";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaNewspaper, FaArrowRight } from "react-icons/fa";
 
 interface ImagemCapa {
   id: number;
@@ -90,9 +91,13 @@ interface NoticiasLight {
   video_url?: string;
   imagem_capa?: { url: string };
   layout: string;
+  documentId?: string;
+  page_layout?: string;
+  isNoticia?: boolean;
+  presentation_mode?: string | null;
 }
 
-export default function NewsAlliance({
+export default function DestaqueAlliance({
   noticias,
   baseImageUrl,
 }: {
@@ -110,6 +115,12 @@ export default function NewsAlliance({
   const [progress, setProgress] = useState(0);
   const groupSize = 2;
   const totalGroups = Math.ceil(noticias.length / groupSize);
+
+  // Log para debug
+  useEffect(() => {
+    console.log("🔵 DestaqueAlliance - noticias recebidas:", noticias);
+    console.log("🔵 DestaqueAlliance - baseImageUrl:", baseImageUrl);
+  }, [noticias, baseImageUrl]);
 
   const updateProgress = useCallback(() => {
     const newProgress = ((currentIndex + 1) / totalGroups) * 100;
@@ -149,12 +160,43 @@ export default function NewsAlliance({
     setProgress((((currentIndex + 1) % totalGroups) / totalGroups) * 100);
   };
 
-  const handleButtonClick = (id: number) => {
-    setLoadingButtons((prev) => ({ ...prev, [id]: true }));
+  const handleButtonClick = (noticia: NoticiasLight) => {
+    setLoadingButtons((prev) => ({ ...prev, [noticia.id]: true }));
+
+    console.log('🔵 DestaqueAlliance - Click em notícia:', {
+      id: noticia.id,
+      documentId: noticia.documentId,
+      isNoticia: noticia.isNoticia,
+      page_layout: noticia.page_layout,
+      titulo: noticia.titulo
+    });
 
     setTimeout(() => {
-      router.push(`/noticia-details/${id}`);
-      setLoadingButtons((prev) => ({ ...prev, [id]: false }));
+      // Se for notícia, navegar para noticia-detalhes
+      if (noticia.isNoticia && noticia.documentId) {
+        const url = `/noticia-detalhes/${noticia.documentId}`;
+        console.log('✅ Navegando para:', url);
+        router.push(url);
+      }
+      // Se for página, navegar com layout específico
+      else if (!noticia.isNoticia && noticia.documentId && noticia.page_layout) {
+        const url = `/${noticia.page_layout}/${noticia.documentId}`;
+        console.log('✅ Navegando para:', url);
+        router.push(url);
+      } 
+      // Fallback para details-submenus
+      else if (noticia.documentId) {
+        const url = `/details-submenus/${noticia.documentId}`;
+        console.log('✅ Navegando para:', url);
+        router.push(url);
+      } 
+      // Fallback antigo
+      else {
+        const url = `/noticia-details/${noticia.id}`;
+        console.log('⚠️ Usando fallback, navegando para:', url);
+        router.push(url);
+      }
+      setLoadingButtons((prev) => ({ ...prev, [noticia.id]: false }));
     }, 2000);
   };
 
@@ -167,9 +209,19 @@ export default function NewsAlliance({
 
   return (
     <div className="flex flex-col items-center w-full h-full p-4 bg-[#F4F2F2] relative">
-      <h1 className="md:text-3xl text-xl font-bold text-center mb-6 text-[#002256]">
+      <h1 className="md:text-3xl text-xl font-bold text-center mb-4 text-[#002256]">
         Aliança em Destaque
       </h1>
+      
+      <Link 
+        href="/noticias"
+        className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#002256] to-[#B7021C] hover:from-[#001a40] hover:to-[#950119] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 mb-8"
+      >
+        <FaNewspaper className="text-lg group-hover:rotate-12 transition-transform duration-300" />
+        <span>Ver todas as notícias</span>
+        <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform duration-300" />
+      </Link>
+
       <div className="flex flex-col items-center gap-6 w-full lg:max-w-6xl px-6 md:px-4">
         {totalGroups > 1 && (
           <button
@@ -180,11 +232,16 @@ export default function NewsAlliance({
             <FaChevronLeft className="text-[#002256] text-sm md:text-xl" />
           </button>
         )}
-        {visibleServices.map((noticia) => (
+        {visibleServices.map((noticia) => {
+          // Determinar ordem: "left" = imagem à esquerda, "right" = imagem à direita
+          const isImageRight = noticia.presentation_mode === "right";
+         
+          
+          return (
           <div
             key={noticia.id}
             className={`flex flex-col md:flex-row ${
-              noticia.layout === "left" ? "" : "md:flex-row-reverse"
+              isImageRight ? "md:flex-row-reverse" : ""
             } gap-4 transition-opacity duration-500 opacity-100`}
           >
             <div className="md:w-[580px] lg:w-[780px] h-auto rounded-xl overflow-hidden shadow-lg relative aspect-video">
@@ -221,7 +278,7 @@ export default function NewsAlliance({
                 {noticia.paragrafo1}
               </p>
               <button
-                onClick={() => handleButtonClick(noticia.id)}
+                onClick={() => handleButtonClick(noticia)}
                 disabled={loadingButtons[noticia.id]}
                 className="flex justify-center items-center transition-all duration-300 ease-in-out transform hover:bg-blue-950 hover:text-white border-2 border-blue-950 text-blue-950 hover:border-transparent px-8 py-2 rounded-lg w-fit self-end text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-950 focus:ring-opacity-50"
               >
@@ -232,7 +289,8 @@ export default function NewsAlliance({
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {totalGroups > 1 && (
           <button

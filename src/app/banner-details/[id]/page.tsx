@@ -8,7 +8,7 @@ import { apiAlianca, BASE_IMAGE_URL } from "@/data/service/axios";
 import { LiaSpinnerSolid } from "react-icons/lia";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/Loading";
-import { ErrorMessage } from "@/components/ErroMessage";
+import ErrorFallback from "@/components/ErrorFallback";
 import ButtonHelp from "@/components/buttonHelp";
 import { MarkdownRenderer } from "@/lib/markdown";
 
@@ -323,9 +323,9 @@ export default function BannerDetails() {
         {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
-          <ErrorMessage error={error} />
+          <ErrorFallback error={error} resetErrorBoundary={() => window.location.reload()} />
         ) : card.length === 0 ? (
-          <ErrorMessage error="Nenhum dado encontrado." />
+          <ErrorFallback error="Nenhum dado encontrado." resetErrorBoundary={() => window.location.reload()} />
         ) : (
           <div className="flex flex-col items-center justify-center w-full">
             {card.map((item) => (

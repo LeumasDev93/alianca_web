@@ -74,6 +74,64 @@ interface PageAPIResponse {
   meta?: any;
 }
 
+// Função para extrair planos da descrição
+const extractPlansFromDescription = (description: RichTextNode[]): Array<{ emoji: string; title: string; description: string; }> => {
+  const plans: Array<{ emoji: string; title: string; description: string; }> = [];
+  let currentPlan: { emoji: string; title: string; description: string; } | null = null;
+
+  description.forEach((block) => {
+    if (block.type === 'paragraph') {
+      const text = block.children?.map(child => child.text).join('') || '';
+      
+      // Se começar com 🔹, é um título de plano
+      if (text.startsWith('🔹')) {
+        // Salvar plano anterior se existir
+        if (currentPlan) {
+          plans.push(currentPlan);
+        }
+        // Criar novo plano
+        currentPlan = {
+          emoji: text.includes('Segura') ? '🛡️' : text.includes('Tranquila') ? '✨' : '👑',
+          title: text.replace('🔹', '').trim(),
+          description: ''
+        };
+      } else if (currentPlan && text.trim() && !text.startsWith('Os nossos planos') && !text.startsWith('Porquê escolher')) {
+        // Adicionar descrição ao plano atual
+        if (currentPlan.description) {
+          currentPlan.description += ' ' + text.trim();
+        } else {
+          currentPlan.description = text.trim();
+        }
+      }
+    }
+  });
+
+  // Adicionar último plano
+  if (currentPlan) {
+    plans.push(currentPlan);
+  }
+
+  return plans;
+};
+
+// Função para extrair benefícios da descrição
+const extractBenefitsFromDescription = (description: RichTextNode[]): string[] => {
+  const benefits: string[] = [];
+  
+  description.forEach((block) => {
+    if (block.type === 'paragraph') {
+      const text = block.children?.map(child => child.text).join('') || '';
+      
+      // Se começar com · ou •, é um benefício
+      if (text.startsWith('·') || text.startsWith('•')) {
+        benefits.push(text.replace(/^[·•]\s*/, '').trim());
+      }
+    }
+  });
+
+  return benefits;
+};
+
 // Função para extrair introdução (texto antes dos planos)
 const extractIntroFromDescription = (description: RichTextNode[]): string => {
   let intro = '';
@@ -82,13 +140,13 @@ const extractIntroFromDescription = (description: RichTextNode[]): string => {
     if (block.type === 'paragraph') {
       const text = block.children?.map(child => child.text).join('') || '';
       
-      // Parar ao encontrar marcadores especiais
-      if (text.includes('Os nossos planos') || text.startsWith('🔹')) {
+      // Parar ao encontrar "Os nossos planos"
+      if (text.includes('Os nossos planos')) {
         break;
       }
       
-      // Ignorar parágrafos vazios
-      if (text.trim()) {
+      // Ignorar parágrafos vazios e título
+      if (text.trim() && !text.startsWith('🔹')) {
         if (intro) intro += ' ';
         intro += text.trim();
       }
@@ -106,8 +164,8 @@ const renderRichText = (description: RichTextNode[]): JSX.Element => {
         if (block.type === 'paragraph') {
           const text = block.children?.map(child => child.text).join('') || '';
           
-          // Se for um emoji + título (🔹 ...)
-          if (text.startsWith('🔹') || text.startsWith('•') || text.startsWith('·')) {
+          // Se for um emoji + título (🔹 Aliança ...)
+          if (text.startsWith('🔹')) {
             return (
               <h3 key={index} className="text-xl font-bold text-[#002256] mt-6 mb-2">
                 {text}
@@ -128,6 +186,29 @@ const renderRichText = (description: RichTextNode[]): JSX.Element => {
   );
 };
 
+// Componente de card de plano
+const PlanCard = ({ emoji, title, description, isHighlighted }: { 
+  emoji: string; 
+  title: string; 
+  description: string; 
+  isHighlighted?: boolean;
+}) => {
+  return (
+    <div className={`bg-white rounded-xl shadow-xl p-6 transition-all duration-300 transform hover:-translate-y-2 border-2 ${
+      isHighlighted ? 'border-[#B7021C] shadow-2xl scale-105' : 'border-gray-200 hover:border-[#002256]'
+    }`}>
+      <div className="text-4xl mb-4">{emoji}</div>
+      <h3 className="text-2xl font-bold text-[#002256] mb-3">{title}</h3>
+      <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
+      {isHighlighted && (
+        <div className="mt-4 inline-block bg-[#B7021C] text-white text-xs font-bold px-3 py-1 rounded-full">
+          MAIS POPULAR
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Componente de card de página relacionada
 const RelatedPageCard = ({ page, onClick }: { page: RelatedPage; onClick: () => void }) => {
   return (
@@ -135,7 +216,7 @@ const RelatedPageCard = ({ page, onClick }: { page: RelatedPage; onClick: () => 
       onClick={onClick}
       className="bg-white rounded-lg shadow-md hover:shadow-xl p-6 transition-all duration-300 cursor-pointer group border border-gray-200 hover:border-[#B7021C]"
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col sm:flex-row h-full items-center justify-center gap-4">
         {/* Ícone */}
         {page.image && (
           <div className="mb-4">
@@ -150,28 +231,30 @@ const RelatedPageCard = ({ page, onClick }: { page: RelatedPage; onClick: () => 
             </div>
           </div>
         )}
-        
-        {/* Título */}
-        <h3 className="text-lg font-bold text-[#002256] mb-2 group-hover:text-[#B7021C] transition-colors">
-          {page.title}
-        </h3>
-        
-        {/* Descrição */}
-        <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-grow">
-          {page.description}
-        </p>
-        
-        {/* Link */}
-        <div className="flex items-center text-[#B7021C] font-semibold text-sm group-hover:gap-2 transition-all">
-          <span>Ver mais</span>
-          <FaArrowRight className="ml-1 group-hover:translate-x-1 transition-transform" />
+        <div className="flex flex-col items-center justify-center"> 
+          <h3 className="text-lg font-bold text-[#002256] mb-2 group-hover:text-[#B7021C] transition-colors">
+            {page.title}
+          </h3>
+          
+          {/* Descrição */}
+          <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-grow">
+            {page.description}
+          </p>
+          
+          {/* Link */}
+          <div className="flex items-center text-[#B7021C] font-semibold text-sm group-hover:gap-2 transition-all">
+            <span>Ver mais</span>
+            <FaArrowRight className="ml-1 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
+       
       </div>
     </div>
   );
 };
 
-export default function DetailsSubmenuPage() {
+
+export default function ParticulareSubmenuDetails() {
   const params = useParams();
   const router = useRouter();
   const documentId = params.id as string;
@@ -251,6 +334,8 @@ export default function DetailsSubmenuPage() {
 
   // Extrair dados da descrição
   const description = pageData.session?.[0]?.description || [];
+  const plans = extractPlansFromDescription(description);
+  const benefits = extractBenefitsFromDescription(description);
   const intro = extractIntroFromDescription(description);
   const subtitle = description[0]?.children?.[0]?.text || pageData.description;
 
@@ -304,20 +389,20 @@ export default function DetailsSubmenuPage() {
               {subtitle}
             </p>
             <button className="bg-white text-[#002256] hover:bg-gray-100 font-bold py-4 px-10 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2">
-              <span>Saiba Mais</span>
+              <span>Contrate Agora</span>
               <FaArrowRight className="text-sm" />
             </button>
           </div>
         </div>
       </section>
 
+
       {/* Conteúdo Principal */}
       <section className="py-12 md:py-20 px-4 md:px-10 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Coluna Principal */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10">
+              <div className="">
                 <h2 className="text-2xl md:text-3xl font-bold text-[#002256] mb-6 border-l-4 border-[#B7021C] pl-4">
                   Sobre o {pageData.title}
                 </h2>
@@ -333,9 +418,62 @@ export default function DetailsSubmenuPage() {
                 )}
               </div>
             </div>
-          </div>
         </div>
       </section>
+      {/* Benefícios Section */}
+      <section className="py-12 md:py-20 px-4 md:px-10 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#002256] mb-4">
+              Porquê escolher o <span className="text-[#B7021C]">{pageData.title}?</span>
+            </h2>
+            <p className="text-gray-600 text-lg">
+              {pageData.description || "Proteção completa e tranquilidade para você"}
+            </p>
+          </div>
+
+          {benefits.length > 0 && (
+            <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <FaCheck className="text-green-600 flex-shrink-0 mt-1" />
+                    <span className="text-gray-700">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Seção de Planos */}
+      {plans.length > 0 && (
+        <section className="py-12 md:py-20 px-4 md:px-10 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#002256] mb-4">
+                Nossos <span className="text-[#B7021C]">Planos</span>
+              </h2>
+              <p className="text-gray-600 text-lg">
+                {intro || "Escolha o plano que melhor se adapta às suas necessidades"}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {plans.map((plan, index) => (
+                <PlanCard
+                  key={index}
+                  emoji={plan.emoji}
+                  title={plan.title}
+                  description={plan.description}
+                  isHighlighted={index === 1}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Seção de Páginas Relacionadas */}
       {pageData.pages && pageData.pages.length > 0 && (
@@ -364,6 +502,9 @@ export default function DetailsSubmenuPage() {
           </div>
         </section>
       )}
+
+
     </div>
   );
 }
+

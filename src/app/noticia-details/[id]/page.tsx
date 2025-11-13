@@ -9,7 +9,7 @@ import { APIResponse } from "@/components/TopicsAlianca";
 import { apiAlianca, BASE_IMAGE_URL } from "@/data/service/axios";
 import { LoadingSpinner } from "@/components/Loading";
 import Link from "next/link";
-import { ErrorMessage } from "@/components/ErroMessage";
+import ErrorFallback from "@/components/ErrorFallback";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ButtonHelp from "@/components/buttonHelp";
 import FloatingButtons from "@/components/FloatingButtons";
@@ -388,33 +388,38 @@ export default function NoticiaDetails() {
     setPage(previousPage);
   };
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error || card.length === 0) {
+    return (
+      <ErrorFallback 
+        error={error || "Nenhum dado encontrado."}
+        resetErrorBoundary={() => window.location.reload()}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <ButtonHelp />
       <FloatingButtons />
       <main className="flex-grow flex flex-col items-center">
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : error ? (
-          <ErrorMessage error={error} />
-        ) : card.length === 0 ? (
-          <ErrorMessage error="Nenhum dado encontrado." />
-        ) : (
-          <div className="flex flex-col items-center justify-center w-full">
-            {card.map((item) => (
-              <NoticiaSection
-                key={item.id}
-                item={item}
-                topicos={topicos}
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-                hasNext={hasNext}
-                hasPrevious={hasPrevious}
-                loading={loading}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-col items-center justify-center w-full">
+          {card.map((item) => (
+            <NoticiaSection
+              key={item.id}
+              item={item}
+              topicos={topicos}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              hasNext={hasNext}
+              hasPrevious={hasPrevious}
+              loading={loading}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );

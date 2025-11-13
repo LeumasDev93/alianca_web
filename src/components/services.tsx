@@ -7,6 +7,8 @@ type ServicosData = {
   id: number;
   title: string;
   icon?: { url: string }[];
+  documentId?: string | null;
+  layout?: string | null;
 };
 import { useRouter } from "next/navigation";
 import { LiaSpinnerSolid } from "react-icons/lia";
@@ -53,9 +55,17 @@ export function Service({ servicos, baseImageUrl }: ServiceProps) {
     setData(servicos || []);
   }, [servicos]);
 
-  const handleButtonClick = (id: number) => {
-    setLoadingButtons((prev) => ({ ...prev, [id]: true }));
-    router.push(`/servico-details/${id}`);
+  const handleButtonClick = (service: ServicosData) => {
+    setLoadingButtons((prev) => ({ ...prev, [service.id]: true }));
+    
+    // Se tiver documentId e layout, navegar dinamicamente
+    if (service.documentId && service.layout) {
+      router.push(`/${service.layout}/${service.documentId}`);
+    } else if (service.documentId) {
+      router.push(`/details-submenus/${service.documentId}`);
+    } else {
+      router.push(`/servico-details/${service.id}`);
+    }
   };
 
   const handlePrev = () => {
@@ -136,12 +146,12 @@ export function Service({ servicos, baseImageUrl }: ServiceProps) {
                         style={{ width: `${100 / itemsPerPage}%` }}
                       >
                         <button
-                          onClick={() => handleButtonClick(service.id)}
+                          onClick={() => handleButtonClick(service)}
                           disabled={loadingButtons[service.id]}
                           className="flex flex-col items-center gap-3 h-full w-full"
                         >
                           <div className="flex flex-col items-center justify-center w-28 h-28 bg-[#e2e0e0] hover:bg-[#bbb7b7] rounded-2xl shadow-md mx-auto">
-                            {service.icon && (
+                            {service.icon && service.icon.length > 0 && service.icon[0]?.url && (
                               <Image
                                 src={`${baseImageUrl}${service.icon[0].url}`}
                                 alt={service.title || "servico sem título"}

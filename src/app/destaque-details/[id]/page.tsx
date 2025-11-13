@@ -9,7 +9,7 @@ import { APIResponse } from "@/components/TopicsAlianca";
 import { apiAlianca, BASE_IMAGE_URL } from "@/data/service/axios";
 import { LoadingSpinner } from "@/components/Loading";
 import Link from "next/link";
-import { ErrorMessage } from "@/components/ErroMessage";
+import ErrorFallback from "@/components/ErrorFallback";
 import ButtonHelp from "@/components/buttonHelp";
 import { LiaSpinnerSolid } from "react-icons/lia";
 import { BlocksRenderer } from "@strapi/blocks-react-renderer";
@@ -428,9 +428,9 @@ export default function DestaqueDetails() {
         {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
-          <ErrorMessage error={error} />
+          <ErrorFallback error={error} resetErrorBoundary={() => window.location.reload()} />
         ) : card.length === 0 ? (
-          <ErrorMessage error="Nenhum dado encontrado." />
+          <ErrorFallback error="Nenhum dado encontrado." resetErrorBoundary={() => window.location.reload()} />
         ) : (
           <div className="flex flex-col items-center justify-center w-full">
             {card.map((item) => (

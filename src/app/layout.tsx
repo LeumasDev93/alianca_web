@@ -5,6 +5,7 @@ import "./globals.css";
 import NextAuthSessionProvider from "@/providers/sessionProvider";
 import HeaderServer from "@/components/HeaderServer";
 import FooterServer from "@/components/FooterServer";
+import FloatingChatButton from "@/components/chat/FloatingChatButton";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default async function RootLayout({
           <HeaderServer />
           {children}
           <FooterServer />
+          <FloatingChatButton />
         </NextAuthSessionProvider>
       </body>
     </html>

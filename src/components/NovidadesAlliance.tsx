@@ -13,17 +13,21 @@ type DestaqueData = {
   titulo: string;
   nome_botao: string;
   imagem?: { url: string } | null;
+  documentId?: string;
+  layout?: string;
+  isNoticia?: boolean;
+  descricao?: string;
 };
 
-interface FeaturedAllianceProps {
+interface NovidadesAllianceProps {
   destaques: DestaqueData[];
   baseImageUrl: string;
 }
 
-export default function FeaturedAlliance({
+export default function NovidadesAlliance({
   destaques,
   baseImageUrl,
-}: FeaturedAllianceProps) {
+}: NovidadesAllianceProps) {
   const [selectedButtonId, setSelectedButtonId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -33,6 +37,12 @@ export default function FeaturedAlliance({
     [key: number]: boolean;
   }>({});
   const [error, setError] = useState<string | null>(null);
+
+  // Log para debug das imagens
+  useEffect(() => {
+    console.log("🔵 NovidadesAlliance - destaques recebidos:", destaques);
+    console.log("🔵 NovidadesAlliance - baseImageUrl:", baseImageUrl);
+  }, [destaques, baseImageUrl]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -80,13 +90,44 @@ export default function FeaturedAlliance({
 
   const router = useRouter();
 
-  const handleButtonClick = (id: number) => {
-    setLoadingButtons((prev) => ({ ...prev, [id]: true }));
+  const handleButtonClick = (item: DestaqueData) => {
+    setLoadingButtons((prev) => ({ ...prev, [item.id]: true }));
+
+    console.log('🔵 NovidadesAlliance - Click em item:', {
+      id: item.id,
+      documentId: item.documentId,
+      isNoticia: item.isNoticia,
+      layout: item.layout,
+      titulo: item.titulo
+    });
 
     setTimeout(() => {
-      router.push(`/destaque-details/${id}`);
-      setSelectedButtonId(id);
-      setLoadingButtons((prev) => ({ ...prev, [id]: false }));
+      // Se for notícia, navegar para noticia-detalhes
+      if (item.isNoticia && item.documentId) {
+        const url = `/noticia-detalhes/${item.documentId}`;
+        console.log('✅ Navegando para:', url);
+        router.push(url);
+      }
+      // Se for página, navegar com layout específico
+      else if (!item.isNoticia && item.documentId && item.layout) {
+        const url = `/${item.layout}/${item.documentId}`;
+        console.log('✅ Navegando para:', url);
+        router.push(url);
+      } 
+      // Fallback para details-submenus
+      else if (item.documentId) {
+        const url = `/details-submenus/${item.documentId}`;
+        console.log('✅ Navegando para:', url);
+        router.push(url);
+      } 
+      // Fallback antigo
+      else {
+        const url = `/destaque-details/${item.id}`;
+        console.log('⚠️ Usando fallback, navegando para:', url);
+        router.push(url);
+      }
+      setSelectedButtonId(item.id);
+      setLoadingButtons((prev) => ({ ...prev, [item.id]: false }));
     }, 2000);
   };
 
@@ -131,7 +172,7 @@ export default function FeaturedAlliance({
                 className="flex flex-col items-center text-center bg-white rounded-xl w-full sm:w-[250px] xl:w-[300px] xl:h-[420px] min-h-[320px] shadow-md p-2 sm:p-3 xl:p-4"
               >
                 <div className="relative w-full h-40 md:h-60 min-h-[160px]">
-                  {card.imagem && (
+                  {card.imagem?.url && (
                     <Image
                       src={`${baseImageUrl}${card.imagem.url}`}
                       alt={card.titulo || "Produto sem título"}
@@ -153,19 +194,26 @@ export default function FeaturedAlliance({
                   </div>
                 </div>
 
-                <div className="mt-6 w-full min-h-[60px] flex items-center justify-center">
-                  <h2 className="text-[#002256] text-sm xl:text-lg font-semibold px-2 line-clamp-2">
-                    {card.titulo || "Sem Título"}
-                  </h2>
+                <div className="mt-6 w-full flex-grow flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-[#002256] text-sm xl:text-lg font-semibold px-2 mb-2 line-clamp-2">
+                      {card.titulo || "Sem Título"}
+                    </h2>
+                    {card.descricao && (
+                      <p className="text-gray-600 text-xs xl:text-sm px-2 line-clamp-3">
+                        {card.descricao}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <button
-                  className={`py-2 px-4 sm:px-6 font-bold rounded hover:bg-[#002256] hover:text-white flex items-center justify-center text-sm xl:text-lg ${
+                  className={`mt-4 py-2 px-4 sm:px-6 font-bold rounded hover:bg-[#002256] hover:text-white flex items-center justify-center text-sm xl:text-lg ${
                     selectedButtonId === card.id
                       ? "bg-[#002256] text-white"
                       : "bg-white text-[#002256] border border-[#002256]"
                   }`}
-                  onClick={() => handleButtonClick(card.id)}
+                  onClick={() => handleButtonClick(card)}
                   disabled={loadingButtons[card.id]}
                 >
                   {loadingButtons[card.id] ? (

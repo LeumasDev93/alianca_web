@@ -12,7 +12,7 @@ import { apiAlianca, BASE_IMAGE_URL } from "@/data/service/axios";
 import { ColaboardorsData, PartenrsData } from "@/types/typesData";
 import { FaSpinner } from "react-icons/fa";
 import { LoadingSpinner } from "@/components/Loading";
-import { ErrorMessage } from "@/components/ErroMessage";
+import ErrorFallback from "@/components/ErrorFallback";
 
 export default function AliancaDetails() {
   const searchParams = useSearchParams();
@@ -95,9 +95,9 @@ export default function AliancaDetails() {
           {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
-          <ErrorMessage error={error} />
+          <ErrorFallback error={error} resetErrorBoundary={() => window.location.reload()} />
         ) : card.length === 0 ? (
-          <ErrorMessage error="Nenhum dado encontrado." />
+          <ErrorFallback error="Nenhum dado encontrado." resetErrorBoundary={() => window.location.reload()} />
         ) : null}
         </div>
       ) : (

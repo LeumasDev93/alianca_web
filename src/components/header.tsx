@@ -19,7 +19,10 @@ import { PhoneIcon, LockKeyhole } from "lucide-react";
 type HeaderSubmenu = {
   id: number;
   name: string;
-  path: string;
+  link: string;
+  documentId?: string | null;
+  layout?: string | null;
+  icon?: { url: string; alt?: string } | null;
 };
 
 type HeaderTopico = {
@@ -73,13 +76,13 @@ export default function Header({
     setExpandedMenu(expandedMenu === menuName ? null : menuName);
   };
 
-  const isSubmenuActive = (path: string, id: number) => {
+  const isSubmenuActive = (link: string, id: number) => {
     const currentPath = pathname
       .split(/[#?]/)[0]
       .replace(/\/+/g, "/")
       .replace(/\/$/, "");
 
-    const pathParts = path.split("/");
+    const pathParts = link.split("/");
     const basePath = pathParts[0];
 
     return currentPath === `/${basePath}/${id}`;
@@ -93,50 +96,65 @@ export default function Header({
 
     return topicos.some((topico) =>
       topico.submenus.some((submenu) => {
-        const normalizedSubmenuPath = submenu.path.replace(/\/+$/, "");
-        return currentPath === `${normalizedSubmenuPath}/${submenu.id}`;
+        const normalizedSubmenuLink = submenu.link.replace(/\/+$/, "");
+        return currentPath === `${normalizedSubmenuLink}/${submenu.id}`;
       })
     );
   };
 
-  const handleButtonClick = (path: string, id: number) => {
-    const cleanPath = path.split(/[#?]/)[0];
-    const normalizedPath = cleanPath.replace(/\/+/g, "/").replace(/\/$/, "");
+  const handleButtonClick = (submenu: HeaderSubmenu, menuName?: string) => {
+    // Se tiver documentId e layout, usar o layout especificado
+    if (submenu.documentId && submenu.layout) {
+      const finalPath = `/${submenu.layout}/${submenu.documentId}`;
+      router.push(finalPath);
+      setIsOpen(false);
+      setHoveredMenu(null);
+      return;
+    }
 
-    const pathParts = normalizedPath.split("/");
-    const basePath = pathParts[0];
+    // Se tiver documentId mas sem layout, usar details-submenus como padrão
+    if (submenu.documentId) {
+      const finalPath = `/details-submenus/${submenu.documentId}`;
+      router.push(finalPath);
+      setIsOpen(false);
+      setHoveredMenu(null);
+      return;
+    }
 
-    const finalPath = `/${basePath}/${id}`;
+    // Se o link não for "#", navegar
+    if (submenu.link && submenu.link !== "#") {
+      // Se for link externo (começa com http), abrir em nova aba
+      if (submenu.link.startsWith('http')) {
+        window.open(submenu.link, '_blank', 'noopener,noreferrer');
+      } else {
+        router.push(submenu.link);
+      }
+      setIsOpen(false);
+      setHoveredMenu(null);
+      return;
+    }
 
-    router.push(finalPath);
+    // Se não tiver destino válido, apenas fechar o menu
     setIsOpen(false);
+    setHoveredMenu(null);
   };
 
   // Social icons are provided by parent via props (static)
 
   return (
-    <header className="bg-white shadow-md fixed top-0 w-full md:h-20 h-14 z-50 px-6 lg:px-20">
+    <header className="bg-white shadow-md fixed top-0 w-full md:h-20 h-14 z-50 px-4 sm:px-6 lg:px-20">
       <div className="flex justify-between items-center h-full max-w-7xl mx-auto">
-        <div className="flex md:space-x-3 justify-between items-center h-full py-2 md:py-0 w-full md:w-auto px-4 md:px-0">
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 focus:outline-none"
-            >
-              <RiMenu2Line size={30} />
-            </button>
-          </div>
-          <div className="flex items-center h-full">
-            <Link href="/" className="text-white text-center flex items-center">
-              <Image
-                src={LogoAlianca}
-                alt="Logo"
-                width={160}
-                height={56}
-                className="w-24 h-8 lg:w-36 lg:h-12"
-              />
-            </Link>
-          </div>
+        {/* Logo - Sempre à esquerda */}
+        <div className="flex items-center h-full">
+          <Link href="/" className="text-white text-center flex items-center">
+            <Image
+              src={LogoAlianca}
+              alt="Logo"
+              width={160}
+              height={56}
+              className="w-24 h-8 sm:w-28 sm:h-10 lg:w-36 lg:h-12"
+            />
+          </Link>
         </div>
 
         {/* Desktop Navigation */}
@@ -178,17 +196,12 @@ export default function Header({
           ))}
         </nav>
 
+        {/* Botão Portal - Desktop */}
         <Link 
           href="https://portal-myalianca.vercel.app" 
           target="_blank"
           rel="noopener noreferrer"
-          className={`
-            relative flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-sm lg:text-base
-            bg-gray-200 text-[#002256]
-            hover:bg-gray-300
-            transition-all duration-300 group
-            ${isOpen ? "hidden" : ""}
-          `}
+          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-sm lg:text-base bg-gray-200 text-[#002256] hover:bg-gray-300 transition-all duration-300 group"
         >
           <LockKeyhole className="w-4 h-4 lg:w-5 lg:h-5" />
           <span className="relative inline-block text-[#B7021C]">
@@ -197,90 +210,179 @@ export default function Header({
           </span>
         </Link>
 
+        {/* Botão Menu - Mobile (à direita) */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden text-gray-700 focus:outline-none p-2"
+        >
+          <RiMenu2Line size={28} />
+        </button>
+
         {/* Desktop Dropdown Menu */}
         <div
-          className={`absolute left-1/2 top-16 sm:top-16 lg:top-20 transform -translate-x-1/2 shadow-xl w-full ${
+          className={`absolute left-0 right-0 top-16 sm:top-16 lg:top-20 shadow-xl w-full ${
             hoveredMenu && hoveredMenu.topicos.length > 0 ? "block" : "hidden"
           }`}
           onMouseEnter={() => setHoveredMenu(hoveredMenu)}
           onMouseLeave={() => setHoveredMenu(null)}
         >
           {hoveredMenu && (
-            <div className="bg-[#F4F2F2] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-4 md:gap-6 lg:gap-8 p-4 sm:p-6 pb-6 sm:pb-10 pointer-events-auto w-full px-4 sm:px-8 md:px-12 lg:px-20 xl:px-32 border-b-2 border-b-red-900">
-              {hoveredMenu.topicos?.map((topico) => (
-                <div key={topico.id} className="space-y-2 sm:space-y-3">
-                  {/* Título do Tópico com Ícone - Responsivo */}
-                  <div className="flex items-center space-x-2 w-full">
-                    {topico.icon && (
-                      <Image
-                        src={topico.icon.url}
-                        alt={topico.icon.alt || topico.title}
-                        width={20}
-                        height={20}
-                        className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
-                      />
-                    )}
-                    <h3 className="font-semibold text-blue-950 text-xs sm:text-sm md:text-base lg:text-lg">
-                      {topico.title}
-                    </h3>
-                  </div>
-
-                  {/* Lista de Submenus - Responsivo */}
-                  {topico.submenus?.length > 0 && (
-                    <ul className="space-y-1 sm:space-y-2">
-                      {topico.submenus.map((submenu) => (
-                        <li key={submenu.id}>
+            <div className="bg-[#F4F2F2] w-full border-b-2 border-b-red-900">
+              {/* Container com largura máxima */}
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-4 md:gap-6 lg:gap-8 py-6 sm:py-8 pb-8 sm:pb-10 pointer-events-auto">
+                  {hoveredMenu.topicos?.map((topico) => {
+                    // Verificar se é um link direto (1 submenu com o mesmo título)
+                    const isDirectLink = topico.submenus?.length === 1 && topico.submenus[0].name === topico.title;
+                    
+                    if (isDirectLink) {
+                      // Renderizar apenas o link, sem título de tópico
+                      const submenu = topico.submenus[0];
+                      return (
+                        <div key={topico.id} className="group">
                           <button
-                            onClick={() =>
-                              handleButtonClick(submenu.path, submenu.id)
-                            }
+                            onClick={() => handleButtonClick(submenu, hoveredMenu?.name)}
                             className={`
-                    block w-full text-left 
-                    px-2 py-1 
-                    text-xs sm:text-sm md:text-[0.9rem] 
-                    transition 
-                    border-b border-blue-900/30 hover:border-red-900 
-                    ${
-                      isSubmenuActive(submenu.path, submenu.id)
-                        ? "font-sans text-[#B7021C] border-b-[#B7021C]"
-                        : "text-blue-950 hover:text-red-700"
-                    }`}
+                              flex items-center gap-2 w-full text-left 
+                              px-2 py-2
+                              text-sm md:text-base font-semibold
+                              transition-colors duration-300
+                              relative
+                              ${
+                                isSubmenuActive(submenu.link, submenu.id)
+                                  ? "text-[#B7021C]"
+                                  : "text-blue-950 hover:text-[#B7021C] hover:font-semibold"
+                              }`}
                           >
-                            {submenu.name}
+                            {submenu.icon && (
+                              <Image
+                                src={submenu.icon.url}
+                                alt={submenu.icon.alt || submenu.name}
+                                width={20}
+                                height={20}
+                                className="w-5 h-5 flex-shrink-0"
+                              />
+                            )}
+                            <span className="relative inline-block pb-2">
+                              {submenu.name}
+                              <span className="absolute bottom-0 left-0 h-[2px] w-full bg-blue-900/30"></span>
+                              <span className={`absolute bottom-0 left-0 h-[2px] bg-[#B7021C] transition-all duration-500 ease-out ${
+                                isSubmenuActive(submenu.link, submenu.id) ? "w-full" : "w-0 group-hover:w-full"
+                              }`}></span>
+                            </span>
                           </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                        </div>
+                      );
+                    }
+
+                    // Renderizar normalmente com título e submenus
+                    return (
+                      <div key={topico.id} className="space-y-2 sm:space-y-3">
+                        {/* Título do Tópico com Ícone - Responsivo */}
+                        <div className="flex items-center space-x-2 w-full">
+                          {topico.icon && (
+                            <Image
+                              src={topico.icon.url}
+                              alt={topico.icon.alt || topico.title}
+                              width={20}
+                              height={20}
+                              className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
+                            />
+                          )}
+                          <h3 className="font-semibold text-blue-950 text-xs sm:text-sm md:text-base lg:text-lg">
+                            {topico.title}
+                          </h3>
+                        </div>
+
+                        {/* Lista de Submenus - Responsivo */}
+                        {topico.submenus?.length > 0 && (
+                          <ul className="space-y-1 sm:space-y-2">
+                            {topico.submenus.map((submenu) => (
+                              <li key={submenu.id} className="group">
+                                <button
+                                  onClick={() =>
+                                    handleButtonClick(submenu, hoveredMenu?.name)
+                                  }
+                                  className={`
+                          flex items-center gap-2 w-full text-left 
+                          px-2 py-1 
+                          text-xs sm:text-sm md:text-[0.9rem] 
+                          transition-colors duration-300
+                          ${
+                            isSubmenuActive(submenu.link, submenu.id)
+                              ? "font-sans text-[#B7021C]"
+                              : "text-blue-950 hover:text-[#B7021C] hover:font-semibold"
+                          }`}
+                                >
+                                  {submenu.icon && (
+                                    <Image
+                                      src={submenu.icon.url}
+                                      alt={submenu.icon.alt || submenu.name}
+                                      width={16}
+                                      height={16}
+                                      className="w-4 h-4 flex-shrink-0"
+                                    />
+                                  )}
+                                  <span className="relative inline-block pb-1">
+                                    {submenu.name}
+                                    <span className="absolute bottom-0 left-0 h-[1px] w-full bg-blue-900/30"></span>
+                                    <span className={`absolute bottom-0 left-0 h-[2px] bg-[#B7021C] transition-all duration-500 ease-out ${
+                                      isSubmenuActive(submenu.link, submenu.id) ? "w-full" : "w-0 group-hover:w-full"
+                                    }`}></span>
+                                  </span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
 
         {/* Mobile Navigation Menu */}
         {isOpen && (
-          <div className="sm:hidden md:hidden fixed top-0 left-0 h-full bg-white p-3 shadow-md w-64 flex flex-col">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-gray-700 absolute top-4 right-4"
-            >
-              <MdClose className="text-2xl" />
-            </button>
-
-            <div>
-              <Link href="/" className="text-white text-center">
+          <div className="md:hidden fixed top-0 left-0 h-full bg-white shadow-2xl w-72 sm:w-80 flex flex-col z-50 overflow-hidden">
+            {/* Header do Menu */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <Link href="/" onClick={() => setIsOpen(false)}>
                 <Image
                   src={LogoAlianca}
                   alt="Logo"
                   width={160}
                   height={56}
-                  className="w-24 h-8 lg:w-40 lg:h-14"
+                  className="w-28 h-10"
                 />
+              </Link>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-700 hover:text-[#B7021C] transition-colors p-2"
+              >
+                <MdClose className="text-3xl" />
+              </button>
+            </div>
+
+            {/* Botão Portal - Mobile */}
+            <div className="px-4 pt-3 pb-2">
+              <Link 
+                href="https://portal-myalianca.vercel.app" 
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-gray-100 to-gray-200 text-[#002256] hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md"
+              >
+                <LockKeyhole className="w-5 h-5" />
+                <span className="text-[#B7021C]">
+                  My<span className="text-[#002256]">Aliança</span>
+                </span>
               </Link>
             </div>
 
-            <div className="w-ful h-0.5 bg-[#002256] my-3"></div>
+            <div className="w-full h-0.5 bg-[#002256] my-2"></div>
 
             <div className="flex-1 overflow-y-auto pb-20">
               <div className="space-y-2">
@@ -302,54 +404,106 @@ export default function Header({
 
                         {expandedMenu === menu.name && (
                           <div className="pl-4 mt-1 space-y-2">
-                            {menu.topicos.map((topico) => (
-                              <div key={topico.id} className="space-y-1">
-                                <div className="flex items-center pl-2">
-                                  {topico.icon && (
-                                    <Image
-                                      src={topico.icon.url}
-                                      alt={topico.title}
-                                      width={20}
-                                      height={20}
-                                      className="mr-2"
-                                      onError={(e) => {
-                                        (
-                                          e.target as HTMLImageElement
-                                        ).style.display = "none";
-                                      }}
-                                    />
-                                  )}
-                                  <span className="font-medium text-blue-950">
-                                    {topico.title}
-                                  </span>
-                                </div>
-
-                                <ul className="pl-8 space-y-1">
-                                  {topico.submenus.map((submenu) => (
-                                    <li key={submenu.id}>
-                                      <button
-                                        onClick={() =>
-                                          handleButtonClick(
-                                            submenu.path,
-                                            submenu.id
-                                          )
-                                        }
-                                        className={`block w-full text-left py-1 px-2 text-blue-950 hover:text-[#B7021C] transition ${
-                                          isSubmenuActive(
-                                            submenu.path,
-                                            submenu.id
-                                          )
-                                            ? "text-[#B7021C] font-medium"
-                                            : ""
-                                        }`}
-                                      >
+                            {menu.topicos.map((topico) => {
+                              // Verificar se é um link direto (1 submenu com o mesmo título)
+                              const isDirectLink = topico.submenus?.length === 1 && topico.submenus[0].name === topico.title;
+                              
+                              if (isDirectLink) {
+                                // Renderizar apenas o link, sem título de tópico
+                                const submenu = topico.submenus[0];
+                                return (
+                                  <div key={topico.id} className="group">
+                                    <button
+                                      onClick={() => handleButtonClick(submenu, menu.name)}
+                                      className={`flex items-center gap-2 w-full text-left py-2 px-2 text-blue-950 hover:text-[#B7021C] transition-colors duration-300 font-medium ${
+                                        isSubmenuActive(submenu.link, submenu.id)
+                                          ? "text-[#B7021C] font-semibold"
+                                          : ""
+                                      }`}
+                                    >
+                                      {submenu.icon && (
+                                        <Image
+                                          src={submenu.icon.url}
+                                          alt={submenu.icon.alt || submenu.name}
+                                          width={18}
+                                          height={18}
+                                          className="w-4.5 h-4.5 flex-shrink-0"
+                                        />
+                                      )}
+                                      <span className="relative inline-block pb-1">
                                         {submenu.name}
-                                      </button>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
+                                        <span className="absolute bottom-0 left-0 h-[1px] w-full bg-blue-900/30"></span>
+                                        <span className={`absolute bottom-0 left-0 h-[1px] bg-[#B7021C] transition-all duration-500 ease-out ${
+                                          isSubmenuActive(submenu.link, submenu.id) ? "w-full" : "w-0 group-hover:w-full"
+                                        }`}></span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                );
+                              }
+
+                              // Renderizar normalmente com título e submenus
+                              return (
+                                <div key={topico.id} className="space-y-1">
+                                  <div className="flex items-center pl-2">
+                                    {topico.icon && (
+                                      <Image
+                                        src={topico.icon.url}
+                                        alt={topico.title}
+                                        width={20}
+                                        height={20}
+                                        className="mr-2"
+                                        onError={(e) => {
+                                          (
+                                            e.target as HTMLImageElement
+                                          ).style.display = "none";
+                                        }}
+                                      />
+                                    )}
+                                    <span className="font-medium text-blue-950">
+                                      {topico.title}
+                                    </span>
+                                  </div>
+
+                                  <ul className="pl-8 space-y-1">
+                                    {topico.submenus.map((submenu) => (
+                                      <li key={submenu.id} className="group">
+                                        <button
+                                          onClick={() =>
+                                            handleButtonClick(submenu, menu.name)
+                                          }
+                                          className={`flex items-center gap-2 w-full text-left py-1 px-2 text-blue-950 hover:text-[#B7021C] transition-colors duration-300 ${
+                                            isSubmenuActive(
+                                              submenu.link,
+                                              submenu.id
+                                            )
+                                              ? "text-[#B7021C] font-medium"
+                                              : ""
+                                          }`}
+                                        >
+                                          {submenu.icon && (
+                                            <Image
+                                              src={submenu.icon.url}
+                                              alt={submenu.icon.alt || submenu.name}
+                                              width={14}
+                                              height={14}
+                                              className="w-3.5 h-3.5 flex-shrink-0"
+                                            />
+                                          )}
+                                          <span className="relative inline-block pb-1">
+                                            {submenu.name}
+                                            <span className="absolute bottom-0 left-0 h-[1px] w-full bg-blue-900/30"></span>
+                                            <span className={`absolute bottom-0 left-0 h-[1px] bg-[#B7021C] transition-all duration-500 ease-out ${
+                                              isSubmenuActive(submenu.link, submenu.id) ? "w-full" : "w-0 group-hover:w-full"
+                                            }`}></span>
+                                          </span>
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </>
@@ -371,51 +525,52 @@ export default function Header({
               </div>
             </div>
 
-            <div className="w-ful h-0.5 bg-[#002256]"></div>
-            <div className="w-full px-4 py-4 text-left">
-              <div className="flex flex-col mb-4">
-                <ul className="text-sm text-blue-950 font-semibold space-y-1">
-                  <li>
-                    <button
-                      onClick={openContactModal}
-                      className="hover:text-blue-900 underline"
-                    >
-                      Contactos
-                    </button>
-                  </li>
-                </ul>
-              </div>
+            {/* Footer do Menu Mobile */}
+            <div className="border-t border-gray-200 bg-gray-50">
+              <div className="px-4 py-4">
+                {/* Contactos */}
+                <div className="mb-3">
+                  <button
+                    onClick={openContactModal}
+                    className="text-sm text-blue-950 font-semibold hover:text-[#B7021C] underline transition-colors"
+                  >
+                    Contactos
+                  </button>
+                </div>
 
-              <div className="flex flex-col mb-4">
-                <h3 className="text-sm font-bold mb-2 text-left text-blue-950">
-                  Siga-nos
-                </h3>
-                <ul className="flex items-center justify-center text-sm space-x-4">
-                  {socialIcons?.map((socias) => (
-                    <li key={socias.id} className="bg-gray-400 p-2 rounded-xl ">
+                {/* Redes Sociais */}
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold mb-2 text-blue-950">
+                    Siga-nos
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    {socialIcons?.map((socias) => (
                       <Link
+                        key={socias.id}
                         onClick={() => setIsOpen(false)}
                         href={socias.url}
-                        className="hover:text-blue-950 bg-blue-950"
+                        className="bg-gray-200 hover:bg-gray-300 p-2 rounded-lg transition-all duration-200 hover:scale-110"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Image
                           src={`${BASE_IMAGE_URL}${socias.icon[0]?.url}`}
                           alt="Social Icon"
-                          width={28}
-                          height={28}
-                          className="rounded-full w-6 h-6 text-blue-900"
+                          width={24}
+                          height={24}
+                          className="w-6 h-6"
                         />
                       </Link>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Copyright */}
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Copyright © {currentYear} Aliança Seguros.<br />
+                  Todos os direitos reservados
+                </p>
               </div>
-              <p className="text-xs text-gray-900">
-                Copyright © {currentYear} Aliança Seguros. Todos os direitos
-                reservados
-              </p>
             </div>
           </div>
         )}

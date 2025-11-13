@@ -8,7 +8,7 @@ import Image from "next/image";
 // Header and Footer are provided by the root layout
 import { LoadingSpinner } from "@/components/Loading";
 import Link from "next/link";
-import { ErrorMessage } from "@/components/ErroMessage";
+import ErrorFallback from "@/components/ErrorFallback";
 import ButtonHelp from "@/components/buttonHelp";
 import FloatingButtons from "@/components/FloatingButtons";
 import { apiAlianca, BASE_IMAGE_URL } from "@/data/service/axios";
@@ -362,31 +362,36 @@ export default function AliancaAboutUsDetails() {
     setPage(previousPage);
   };
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error || !artigo) {
+    return (
+      <ErrorFallback 
+        error={error || "Nenhum dado encontrado."}
+        resetErrorBoundary={() => window.location.reload()}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header provided by layout */}
       <ButtonHelp />
       <FloatingButtons />
       <main className="flex-grow flex flex-col items-center">
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : error ? (
-          <ErrorMessage error={error} />
-        ) : !artigo ? (
-          <ErrorMessage error="Nenhum dado encontrado." />
-        ) : (
-          <div className="flex flex-col items-center justify-center w-full">
-            <ArtigoSection
-              artigo={artigo}
-              topicosRelacionados={topicosRelacionados}
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-              hasNext={hasNext}
-              hasPrevious={hasPrevious}
-              loading={loading}
-            />
-          </div>
-        )}
+        <div className="flex flex-col items-center justify-center w-full">
+          <ArtigoSection
+            artigo={artigo}
+            topicosRelacionados={topicosRelacionados}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            hasNext={hasNext}
+            hasPrevious={hasPrevious}
+            loading={loading}
+          />
+        </div>
       </main>
       {/* Footer provided by layout */}
     </div>
