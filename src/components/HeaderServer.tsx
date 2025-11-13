@@ -7,7 +7,6 @@ export const revalidate = 60; // Revalidate every 60 seconds (ISR)
 
 async function fetchFromApi<T>(path: string): Promise<T[]> {
   const url = `${STRAPI_URL}/api${path}`;
-  console.log("🔵 Fetching from:", url);
   
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
@@ -15,10 +14,6 @@ async function fetchFromApi<T>(path: string): Promise<T[]> {
   });
   
   if (!res.ok) {
-    console.error("❌ Fetch error:", res.status, res.statusText);
-    console.error("❌ URL completa:", url);
-    const errorText = await res.text();
-    console.error("❌ Error body:", errorText);
     return [] as T[];
   }
   

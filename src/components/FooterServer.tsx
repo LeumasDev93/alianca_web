@@ -6,9 +6,6 @@ export const revalidate = 60;
 
 async function fetchFooterData(): Promise<any> {
   const url = `${STRAPI_URL}/api/footer?populate[itens][populate][0]=itens&populate[itens][populate][itens][populate][1]=icon`;
-  console.log("🔵 Footer fetching from:", url);
-  console.log("🔵 STRAPI_URL:", STRAPI_URL);
-  console.log("🔵 STRAPI_TOKEN exists:", !!STRAPI_TOKEN);
   
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },

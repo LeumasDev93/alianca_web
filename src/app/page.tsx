@@ -14,7 +14,6 @@ import { STRAPI_URL, STRAPI_TOKEN } from "@/data/service/axios";
 
 async function fetchBannersData(): Promise<any[]> {
   const url = `${STRAPI_URL}/api/banners?populate[banner][populate][0]=image&populate[banner][populate][1]=video&populate[banner][populate][2]=button&populate[banner][populate][3]=button.page`;
-  console.log("🔵 Banners fetching from:", url);
   
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
@@ -22,12 +21,10 @@ async function fetchBannersData(): Promise<any[]> {
   });
   
   if (!res.ok) {
-    console.error("❌ Banners fetch error:", res.status, res.statusText);
     return [];
   }
   
   const json = await res.json();
-  console.log("🔵 Banners data received:", JSON.stringify(json.data, null, 2));
   return json.data || [];
 }
 
@@ -35,20 +32,16 @@ async function fetchHomePageData(): Promise<any> {
   // URL exata fornecida pelo usuário
   const url = `${STRAPI_URL}/api/home-page?populate[sessions][populate][0]=itens&populate[sessions][populate][itens][populate][1]=button&populate[sessions][populate][itens][populate][2]=image_presentation&populate[sessions][populate][itens][populate][3]=video_presentation&populate[sessions][populate][itens][populate][4]=button.page&populate[sessions][populate][itens][populate][5]=button.noticia`;
   
-  console.log("🔵 HomePage fetching from:", url);
-  
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
     next: { revalidate: 60 },
   });
   
   if (!res.ok) {
-    console.error("❌ HomePage fetch error:", res.status, res.statusText);
     return null;
   }
   
   const json = await res.json();
-  console.log("🔵 HomePage data received:", JSON.stringify(json.data, null, 2));
   return json.data;
 }
 
@@ -113,17 +106,6 @@ export default async function Home() {
         } : undefined,
       };
 
-      console.log('🔵 Mapeando item dinâmico:', {
-        id: result.id,
-        title: result.title,
-        tem_imagem: !!result.image,
-        tem_video: !!result.video,
-        tem_button: !!result.button,
-        presentation_mode: result.presentation_mode,
-        documentId: result.button?.documentId || 'null',
-        direct_link: result.button?.link || 'null'
-      });
-
       return result;
     });
   };
@@ -158,16 +140,6 @@ export default async function Home() {
       descricao = item.button.page.resume || '';
     }
     
-    console.log('🔵 Processando Novidade:', {
-      id: item.id,
-      titulo_item: item.title,
-      botao: item.button?.description,
-      hasNoticia,
-      hasPage,
-      descricao: descricao ? descricao.substring(0, 50) + '...' : '(vazio)',
-      documentId: hasNoticia ? item.button.noticia.documentId : (hasPage ? item.button.page.documentId : null)
-    });
-    
     const result = {
       id: item.id,
       titulo: item.title || "Novidade", // Título direto do item
@@ -178,12 +150,6 @@ export default async function Home() {
       layout: hasPage ? item.button.page.layout : null,
       descricao: descricao,
     };
-    
-    console.log('🔵 Novidade mapeada:', {
-      id: result.id,
-      tem_imagem: !!result.imagem,
-      imagem_url: result.imagem?.url || 'null'
-    });
     
     return result;
   });
@@ -201,19 +167,6 @@ export default async function Home() {
       paragrafo1 = item.button.page.resume || '';
     }
     
-    console.log('🔵 Processando Destaque:', {
-      id: item.id,
-      titulo_item: item.title,
-      presentation_mode: item.presentation_mode,
-      hasNoticia,
-      hasPage,
-      button_noticia_completo: item.button?.noticia ? 'SIM' : 'NÃO',
-      noticia_documentId: item.button?.noticia?.documentId || 'null',
-      paragrafo1: paragrafo1 ? paragrafo1.substring(0, 50) + '...' : '(vazio)',
-      video_url: item.url_video,
-      documentId: hasNoticia ? item.button.noticia.documentId : (hasPage ? item.button.page.documentId : null)
-    });
-    
     const result = {
       id: item.id,
       titulo: item.title || "Destaque", // Título direto do item
@@ -227,14 +180,6 @@ export default async function Home() {
       presentation_mode: item.presentation_mode || "left", // ← Campo para controlar posição
     };
     
-    console.log('🔵 Destaque mapeado:', {
-      id: result.id,
-      tem_imagem: !!result.imagem_capa,
-      imagem_url: result.imagem_capa?.url || 'null',
-      tem_video: !!result.video_url,
-      presentation_mode: result.presentation_mode
-    });
-    
     return result;
   });
 
@@ -246,13 +191,6 @@ export default async function Home() {
     homeData.sessions?.forEach((session: any, index: number) => {
       if (!session.isActive) return;
 
-      console.log(`🔵 Processando seção ${index + 1}:`, {
-        id: session.id,
-        title: session.title,
-        layout: session.layout,
-        ordem_api: index + 1
-      });
-
       // Primeira ocorrência de "Novidades" usa componente específico
       if (session.layout === 'Novidades' && !renderedSpecificLayouts.has('Novidades')) {
         renderedSpecificLayouts.set('Novidades', session.id);
@@ -263,7 +201,6 @@ export default async function Home() {
             baseImageUrl={STRAPI_URL}
           />
         );
-        console.log('✅ Renderizado: NovidadesAlliance (componente específico)');
       }
       // Primeira ocorrência de "Destaques" usa componente específico
       else if (session.layout === 'Destaques' && !renderedSpecificLayouts.has('Destaques')) {
@@ -275,7 +212,6 @@ export default async function Home() {
             baseImageUrl={STRAPI_URL}
           />
         );
-        console.log('✅ Renderizado: DestaqueAlliance (componente específico)');
       }
       // Primeira ocorrência de "Produtos" usa componente específico
       else if (session.layout === 'Produtos' && !renderedSpecificLayouts.has('Produtos')) {
@@ -287,18 +223,10 @@ export default async function Home() {
             baseImageUrl={STRAPI_URL}
           />
         );
-        console.log('✅ Renderizado: Service (componente específico)');
       }
       // Qualquer outra seção (duplicata ou layout desconhecido) usa DynamicSection
       else {
         const dynamicItems = mapDynamicSectionItems(session.itens || []);
-        
-        console.log('✅ Renderizado: DynamicSection', {
-          title: session.title,
-          layout: session.layout,
-          items: dynamicItems.length,
-          is_duplicate: renderedSpecificLayouts.has(session.layout)
-        });
 
         sections.push(
           <DynamicSection
@@ -312,7 +240,6 @@ export default async function Home() {
       }
     });
 
-    console.log(`🔵 Total de seções renderizadas: ${sections.length}`);
     return sections;
   };
 
